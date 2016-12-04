@@ -12,10 +12,14 @@
   require('./components');
   app.config(['$routeProvider', function ($routeProvider) {
           $routeProvider.when('/', {
-              templateUrl: _templateBase + '/home/home.html' ,
+              templateUrl: _templateBase + '/home/home.html',
               controller: 'HomeCtrl'
-          });
-          $routeProvider.otherwise({ redirectTo: '/' });
+          })
+          .when('/register', {
+            templateUrl: _templateBase + '/register/register.html',
+            controller: 'RgstrCtrl'
+          })
+          .otherwise({ redirectTo: '/' });
       }
   ]);
 

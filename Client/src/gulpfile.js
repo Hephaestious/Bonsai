@@ -15,7 +15,7 @@ function runApp() {
   gulp.watch('main.js', electron.restart);
 
   // Reload renderer process
-  gulp.watch(['./angular/bund.js', 'index.html'], electron.reload);
+  gulp.watch(['./angular/bundle.js', 'index.html'], electron.reload);
 }
 
 gulp.task('build', function() {
@@ -23,7 +23,7 @@ gulp.task('build', function() {
     .bundle()
     .pipe(source('./angular/app.js'))
     .pipe(buffer())
-    .pipe(rename('bund.js'))
+    .pipe(rename('bundle.js'))
     .pipe(gulp.dest('./angular'));
 
   runApp();
