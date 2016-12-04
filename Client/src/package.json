@@ -1,0 +1,20 @@
+{
+  "name": "backroom",
+  "version": "1.0.0",
+  "description": "Client for backroom project",
+  "main": "main.js",
+  "dependencies": {
+    "angular": "^1.5.9",
+    "angular-route": "^1.5.9",
+    "electron": "^1.4.8",
+    "js-base64": "^2.1.9",
+    "nedb": "^1.8.0",
+    "text-encoding": "^0.6.1",
+    "tweetnacl": "^0.14.3"
+  },
+  "devDependencies": {
+    "electron-connect": "^0.6.1",
+    "gulp": "^3.9.1",
+    "watchify": "^3.7.0"
+  }
+}
