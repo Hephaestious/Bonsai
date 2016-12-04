@@ -1,10 +1,13 @@
 'use strict';
 
 var gulp = require('gulp');
+var browserify = require('browserify');
 var electron = require('electron-connect').server.create();
+var source = require('vinyl-source-stream');
+var buffer = require('vinyl-buffer');
+var rename = require('gulp-rename');
 
-gulp.task('run', function () {
-
+function runApp() {
   // Start browser process
   electron.start();
 
@@ -13,4 +16,19 @@ gulp.task('run', function () {
 
   // Reload renderer process
   gulp.watch(['./angular/bund.js', 'index.html'], electron.reload);
+}
+
+gulp.task('build', function() {
+  var b = browserify('./angular/app.js')
+    .bundle()
+    .pipe(source('./angular/app.js'))
+    .pipe(buffer())
+    .pipe(rename('bund.js'))
+    .pipe(gulp.dest('./angular'));
+
+  runApp();
+})
+
+gulp.task('run', function () {
+  runApp();
 });
