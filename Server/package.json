@@ -1,14 +1,13 @@
 {
-  "name": "backroom-server",
-  "version": "0.1.0",
+  "name": "bonsai-server",
+  "version": "0.0.2",
+  "description": "Server for Bonsai chat",
   "main": "server.js",
+  "license": "MIT",
   "dependencies": {
-    "body-parser": "~1.0.1",
-    "express": "~4.0.0",
     "js-base64": "^2.1.9",
-    "mongoose": "~3.6.13",
     "nedb": "^1.8.0",
-    "text-encoding": "^0.6.1",
-    "tweetnacl": "^0.14.3"
+    "socket.io": "^1.7.1",
+    "tweetnacl": "^0.14.4"
   }
 }

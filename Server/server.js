@@ -1,22 +1,14 @@
-// Imports
-
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
+var io = require('socket.io')();
 var nacl = require('tweetnacl');
-var b64 = require('js-base64').Base64;
 var fs = require('fs');
-var secret = fs.readFileSync('Certificate.crt');
-var pvt_Identity = nacl.box.keyPair.fromSecretKey(secret);
-
-// Helper functions
-
-var ips = {};
-
+var b64 = require('js-base64').Base64;
+var path = require('path');
+var secret = new Uint8Array(fs.readFileSync(path.resolve(__dirname, 'Certificate.crt')));
 var Datastore = require('nedb')
   , db = new Datastore({ filename: 'db', autoload: true });
 
-// js doesn't have string formatting by default
+// Helper functions
+
 if (!String.prototype.format) {
   String.prototype.format = function() {
     var args = arguments;
@@ -29,72 +21,60 @@ if (!String.prototype.format) {
   };
 }
 
-function getUser(username){
-  db.findOne({"username": username}, function(err, doc){
-    if (err){
-      throw new Exception("Error retrieving user from database");
+// Socket listeners
+
+io.on('connection', function(socket){
+  socket.emit('got it');
+  console.log('Socket connection established');
+  socket.on('register', function(requestCipher, cb){
+    // TODO - Better validation
+    var request = decryptCall(requestCipher);
+    if (!request){ // Indicates that decryption was not successful
+      // TODO: Handle this better
+      cb({status: 'could not decrypt'});
+      return;
     }
-    return doc;
-  })
+    // I just concatenated the byte arrays of these to save the code from some weird encoding logic since all the
+    // items have to be made into a single byte array for encryption anyways
+    var identity_key = request.slice(0,32);
+    var signature = request.slice(32,96);
+    var username = request.slice(96, request.length);
+    var sigValid = nacl.sign.detached.verify(username, signature, identity_key);
+    if (!sigValid){ // Indicates signature is not valid
+      // TODO: More detailed response
+      return cb({status: 'bad signature'});
+    }
+    username = Buffer.from(username).toString('utf8');
+    db.findOne({username: username}, function(err, doc){
+      if (err){
+        return cb({status: 'try again later'});
+      } else if(doc !== null){
+        return cb({status: 'username taken'});
+      } else {
+        var userBinding = {
+          username: username,
+          identity_key: identity_key,
+          signature: signature
+        }
+        db.insert(userBinding, function(err, newDoc){
+          if (err){
+            return cb({status: 'try again later'})
+          }
+          return cb({status: 'success', id: newDoc._id});
+        });
+      }
+    });
+  });
+});
+io.listen(3000);
+
+function decryptCall(req){
+  // Decrypts API Calls with server's identity key
+  var cipher = Uint8Array.from(req.cipher.data);
+  var c_sessionKey = Uint8Array.from(req.session_key.data);
+  var nonce = Uint8Array.from(req.nonce.data);
+  var data = Uint8Array.from(nacl.box.open(cipher, nonce, c_sessionKey, secret));
+  return data;
 }
 
-
-// Server
-
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
-
-var port = process.env.PORT || 8080;
-
-var router = express.Router();
-
-router.get('/', function(req, res) {
-  res.json({message: "Welcome!"});
-});
-
-router.get('/available', function(req, res) {
-  var cipher = req.body.cipher;
-
-  res.json({available: true});
-});
-
-router.post('/register', function(req, res) {
-  console.log("Got register request");
-  var cipher = new Uint8Array(new Buffer(b64.decode(req.body.cipher)).toString().split(','));
-  var c_sessionKey = new Uint8Array(new Buffer(b64.decode(req.body.session_key)).toString().split(','));
-  var nonce = new Uint8Array(new Buffer(b64.decode(req.body.nonce)).toString().split(','));
-  var data = nacl.box.open(cipher, nonce, c_sessionKey, secret);
-  console.log("Trying to decrypt box");
-  if (!data){
-    res.send(400); // Tell client to fuck off with shitty requests
-  }
-  console.log("Got register request");
-  // data is b64 encoded json string
-  data = JSON.parse(b64.decode(new Buffer(data)));
-  var signature = new Uint8Array(new Buffer(b64.decode(data.signature)).toString().split(','));
-  console.log("Username signature: ",b64.decode(data.signature))
-  var identity_key = new Uint8Array(new Buffer(b64.decode(data.identity_key)).toString().split(','));
-  var username = data.username;
-  var sigValid = nacl.sign.open(signature, identity_key);
-  var b_user = new Uint8Array(data.username);
-  if (sigValid !== data.username){
-    res.send(400); // tell client to fuck off
-  }
-  if (getUser(username)){
-    res.send(409);
-  }
-  db.insert({
-    username: username,
-    identity_key: identity_key,
-    signature: signature
-  });
-  console.log(username);
-  res.json('success');
-});
-
-app.use('/api', router);
-
-app.listen(port);
-
-
-console.log('Doing baller shit on port {0}'.format(port));
+console.log('Listening to port 3000');

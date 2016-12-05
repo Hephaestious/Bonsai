@@ -1,7 +1,7 @@
 {
-  "name": "backroom",
-  "version": "1.0.0",
-  "description": "Client for backroom project",
+  "name": "bonsai-client",
+  "version": "0.0.2",
+  "description": "Client for Bonsai chat",
   "main": "main.js",
   "dependencies": {
     "angular": "^1.5.9",
@@ -9,8 +9,10 @@
     "electron": "^1.4.8",
     "js-base64": "^2.1.9",
     "nedb": "^1.8.0",
+    "socket.io": "^1.7.1",
+    "socket.io-client": "^1.7.1",
     "text-encoding": "^0.6.1",
-    "tweetnacl": "^0.14.3"
+    "tweetnacl": "^0.14.4"
   },
   "devDependencies": {
     "browserify": "^13.1.1",
