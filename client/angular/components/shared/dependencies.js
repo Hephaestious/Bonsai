@@ -1,5 +1,10 @@
 var nacl = require('tweetnacl');
 var socket = require('socket.io-client')('http://localhost:3000');
+console.log(socket);
+socket.on('got it', function(){
+  console.log('connected');
+  console.log(socket);
+})
 // Marshals a string to Uint8Array.
 var b64 = require('js-base64').Base64;
 var fs = require('fs');

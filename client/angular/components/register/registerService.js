@@ -3,15 +3,18 @@
     var _identity, _session, _username;
     var _checkKey, _checkUser, _checkCallback;
     var check = function(username, scope){
+      console.log('checking');
       if (db.isAccount(username)) return;
       _checkUser = username;
       var req = db.newRequest(username, 'utf8');
       _checkKey = req.key;
       // TODO - Find a better way to link responses and requests
       var checkCallback = function(data){
+        console.log((data ? "not " : ""), "available");
         scope.usernameValid = data;
       }
-      socket.emit('username-available', req.request, checkCallback);
+      console.log(socket.emit('available', req.request, checkCallback));
+      console.log(socket);
     }
 
     var register = function(user){
