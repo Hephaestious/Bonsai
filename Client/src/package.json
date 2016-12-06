@@ -8,6 +8,7 @@
     "angular-route": "^1.5.9",
     "electron": "^1.4.8",
     "js-base64": "^2.1.9",
+    "lokijs": "^1.4.1",
     "nedb": "^1.8.0",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.1",
@@ -19,6 +20,7 @@
     "electron-connect": "^0.6.1",
     "gulp": "^3.9.1",
     "gulp-rename": "^1.2.2",
+    "run-sequence": "^1.2.2",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.7.0"

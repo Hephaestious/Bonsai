@@ -4,8 +4,19 @@ var fs = require('fs');
 var b64 = require('js-base64').Base64;
 var path = require('path');
 var secret = new Uint8Array(fs.readFileSync(path.resolve(__dirname, 'Certificate.crt')));
-var Datastore = require('nedb')
-  , db = new Datastore({ filename: 'db', autoload: true });
+var loki = require('lokijs');
+var users;
+var _db = new loki(path.resolve(__dirname, 'bonsai.db'), {
+  autosave: true,
+  autosaveInterval: 1500,
+  autoload: true,
+  autoloadCallback: loadHandler // heh
+});
+function loadHandler(){
+  users = _db.getCollection('users') || _db.addCollection('users', {
+    autoupdate: true
+  });
+}
 
 // Helper functions
 
@@ -26,13 +37,28 @@ if (!String.prototype.format) {
 io.on('connection', function(socket){
   socket.emit('got it');
   console.log('Socket connection established');
+  socket.on('username-available', function(requestCipher, cb){
+    console.log(typeof cb);
+    console.log(cb);
+    var request = decryptCall(requestCipher);
+    var username = Buffer.from(request).toString('utf8');
+    if (users.find({username: username}).length !== 0){
+      return cb(false);
+    }
+    cb(true);
+  });
   socket.on('register', function(requestCipher, cb){
+    /*
+    SUPER DUPER IMPORTANT DO NOT FORGET THIS!!!!!!!!!!!1111!!!!
+    TODO - Replace callback usage or make sure it's safe.
+    Letting the server execute code on the client is retarded, I just wasn't
+    sure how to reply to the client so I'm using this for development
+    */
     // TODO - Better validation
     var request = decryptCall(requestCipher);
     if (!request){ // Indicates that decryption was not successful
       // TODO: Handle this better
-      cb({status: 'could not decrypt'});
-      return;
+      return cb({status: 'could not decrypt'});
     }
     // I just concatenated the byte arrays of these to save the code from some weird encoding logic since all the
     // items have to be made into a single byte array for encryption anyways
@@ -45,25 +71,16 @@ io.on('connection', function(socket){
       return cb({status: 'bad signature'});
     }
     username = Buffer.from(username).toString('utf8');
-    db.findOne({username: username}, function(err, doc){
-      if (err){
-        return cb({status: 'try again later'});
-      } else if(doc !== null){
-        return cb({status: 'username taken'});
-      } else {
-        var userBinding = {
-          username: username,
-          identity_key: identity_key,
-          signature: signature
-        }
-        db.insert(userBinding, function(err, newDoc){
-          if (err){
-            return cb({status: 'try again later'})
-          }
-          return cb({status: 'success', id: newDoc._id});
-        });
-      }
-    });
+    if (users.find({username: username}).length !== 0){
+      return cb({status: 'username taken'});
+    }
+    var newUser = {
+      username: username,
+      identity_key: identity_key,
+      signature: signature
+    }
+    users.insert(newUser);
+    return cb({status: 'success'});
   });
 });
 io.listen(3000);

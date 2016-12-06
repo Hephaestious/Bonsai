@@ -6,7 +6,7 @@
   require('angular-route');
 
   var _templateBase = './angular/components';
-  var app = angular.module('backroom', [
+  var app = angular.module('bonsai', [
       'ngRoute'
   ]);
   require('./components');
