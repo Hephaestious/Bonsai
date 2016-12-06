@@ -1,5 +1,6 @@
-#username {
-  border-color: green;
-  border: 10px;
+.validUsername {
+  background-color: green;
+}
+.invalidUsername {
   background-color: red;
 }

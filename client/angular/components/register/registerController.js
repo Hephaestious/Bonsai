@@ -1,7 +1,6 @@
 (function(){
   'use strict';
   var RgstrCtrl = function($scope, RgstrSrvc){
-    console.log(socket);
     $scope.showCreate = true;
     $scope.usernameValid = false;
 

@@ -8,9 +8,8 @@
   </div>
 
   <div id='createAccount' ng-show='showCreate'>
-    {{usernameValid ? 'yes' : 'no'}}
     <img ng-src='{{usernameValid ? ("assets/img/available.png" || null) : ("assets/img/notAvailable.png" || null)}}' />
-    Username <input ng-model='username' ng-change='checkUser(username)' type='text' id="username">
+    Username <input ng-model='username' ng-change='checkUser(username)' type='text' id="username" class='{{usernameValid ? "validUsername" : "invalidUsername"}}'>
   </br>
     Password <input ng-model='password' type='password' ng-disabled='usernameValid'>
     <button ng-click='Create()'>Create</button>

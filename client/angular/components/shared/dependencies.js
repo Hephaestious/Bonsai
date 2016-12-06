@@ -1,9 +1,8 @@
 var nacl = require('tweetnacl');
-var socket = require('socket.io-client')('http://localhost:3000');
-console.log(socket);
-socket.on('got it', function(){
-  console.log('connected');
-  console.log(socket);
+console.log("Attempting to connect...");
+var socket = require('socket.io-client')('http://localhost:3000', {transports: ['websocket'], upgrade: false});
+socket.on('got', function(a){
+  console.log("Received connection acknowledgement.");
 })
 // Marshals a string to Uint8Array.
 var b64 = require('js-base64').Base64;
