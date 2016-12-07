@@ -35,12 +35,13 @@ if (!String.prototype.format) {
 // Socket listeners
 
 io.on('connection', function(socket){
-  socket.emit('got it');
+  socket.emit('got','');
   console.log('Socket connection established');
   socket.on('available', function(requestCipher, cb){
     console.log('got availability request');
     var request = decryptCall(requestCipher);
     var username = Buffer.from(request).toString('utf8');
+    console.log(username);
     if (users.find({username: username}).length !== 0){
       console.log('false');
       return cb(false);
@@ -49,6 +50,7 @@ io.on('connection', function(socket){
     console.log(true);
   });
   socket.on('register', function(requestCipher, cb){
+    console.log("Got register request.");
     /*
     SUPER DUPER IMPORTANT DO NOT FORGET THIS!!!!!!!!!!!1111!!!!
     TODO - Replace callback usage or make sure it's safe.

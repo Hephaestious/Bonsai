@@ -19,3 +19,5 @@ if (!String.prototype.format) {
     });
   };
 }
+var path = require('path');
+var loki = require('lokijs');

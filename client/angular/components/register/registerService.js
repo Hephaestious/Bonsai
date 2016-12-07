@@ -4,7 +4,7 @@
     var _checkKey, _checkUser, _checkCallback;
     var check = function(username, scope){
       console.log('checking');
-      //if (db.isAccount(username)) $scope.usernameValid = false;
+      if (db.isAccount(username)) $scope.usernameValid = false;
       _checkUser = username;
       var req = db.newRequest(username, 'utf8');
       _checkKey = req.key;

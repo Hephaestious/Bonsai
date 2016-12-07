@@ -7,6 +7,7 @@
     "angular": "^1.5.9",
     "angular-route": "^1.5.9",
     "electron": "^1.4.8",
+    "fs": "0.0.1-security",
     "gulp-less": "^3.3.0",
     "js-base64": "^2.1.9",
     "lokijs": "^1.4.1",
@@ -17,8 +18,10 @@
     "tweetnacl": "^0.14.4"
   },
   "devDependencies": {
+    "brfs": "^1.4.3",
     "browserify": "^13.1.1",
     "electron-connect": "^0.6.1",
+    "fs": "0.0.1-security",
     "gulp": "^3.9.1",
     "gulp-less": "^3.3.0",
     "gulp-rename": "^1.2.2",

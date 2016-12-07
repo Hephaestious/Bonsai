@@ -1,8 +1,8 @@
 (function(){
   'use strict';
-  var RgstrCtrl = function($scope, RgstrSrvc){
-    $scope.showCreate = true;
-    $scope.usernameValid = false;
+  var RgstrCtrl = function($scope, db, RgstrSrvc){
+    $scope.isDefault = !db.anyAccounts;
+    $scope.usernameValid = null;
 
     $scope.checkUser = function(username){
       RgstrSrvc.check(username, $scope);
@@ -17,5 +17,5 @@
 
   };
 
-  module.exports = ["$scope", 'RgstrSrvc', RgstrCtrl];
+  module.exports = ["$scope", 'db', 'RgstrSrvc', RgstrCtrl];
 }());

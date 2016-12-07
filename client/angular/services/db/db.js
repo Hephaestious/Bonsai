@@ -1,9 +1,7 @@
+'use strict';
 (function(){
-  var loki = require('lokijs');
-  var db = function(){
-    var _db = new loki('bonsai.db');
-    var accounts = _db.getCollection('accounts') || _db.addCollection('accounts');
-
+  var db = function(_db){
+    console.log(_db);
     function newRequest(message, encoding=null){
       var requestKey = nacl.box.keyPair();
       var nonce = nacl.randomBytes(nacl.box.nonceLength);
@@ -19,27 +17,40 @@
       });
     }
 
+    var accounts = _db.getCollection('accounts') || _db.addCollection('accounts', {autoupdate: true});
+
+    var anyAccounts = function(){
+      return accounts.count() > 0;
+    }
+
     function isAccount(username){
       // This only checks if there is a local account
-      if (accounts.find({username: username}).length !== 0){
-        return true;
-      }
+      return accounts.find({username: username}).length !== 0;
     }
 
     function addAccount(username, identity){
       console.log("Adding account to database: ", username);
-      accounts.insert({
+      var newAccount = {
         username: username,
         identity: identity
-      });
+      };
+      accounts.insert(newAccount);
+      _db.saveDatabase();
+      console.log(accounts.count());
+      console.log(_db.getCollection('accounts').count());
     }
 
     return {
       addAccount: addAccount,
       isAccount: isAccount,
-      newRequest: newRequest
+      newRequest: newRequest,
+      get anyAccounts(){return anyAccounts()},
+      get primaryAccount(){
+        return accounts.findOne({username: 'dinglee'}) || accounts.findOne({});
+      },
+      accounts: accounts.find({})
     }
   }
 
-  module.exports = db;
+  module.exports = ['_db', db];
 }());

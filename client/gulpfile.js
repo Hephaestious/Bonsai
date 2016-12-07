@@ -9,6 +9,20 @@ var rename = require('gulp-rename');
 var less = require('gulp-less');
 var gulpSequence = require('gulp-sequence');
 
+function build(){
+  console.log('fucku');
+  gulp.src('./assets/less/**/*.less')
+    .pipe(less())
+    .pipe(gulp.dest('./assets/css'));
+  var b = browserify('./angular/app.js');
+  b.transform('brfs'); // fixes file system issues with browserify
+  b.bundle()
+    .pipe(source('./angular/app.js'))
+    .pipe(buffer())
+    .pipe(rename('bundle.js'))
+    .pipe(gulp.dest('./angular'));
+}
+
 function runApp() {
   // Start browser process
   electron.start();
@@ -22,6 +36,7 @@ function runApp() {
 
 gulp.task('build-js', function() {
   var b = browserify('./angular/app.js')
+    .transform('brfs') // fixes file system issues with browserify
     .bundle()
     .pipe(source('./angular/app.js'))
     .pipe(buffer())
@@ -35,22 +50,15 @@ gulp.task('build-less', function () {
     .pipe(gulp.dest('./assets/css'));
 });
 
-/*gulp.task('run', function () {
+gulp.task('run', function () {
+  build();
   runApp();
-});*/
+});
 
-gulp.task('build', gulpSequence('build-js', 'build-less'));
+//gulp.task('build', gulpSequence('build-js', 'build-less'));
 
 // Build with atom's build-gulp package
 gulp.task('default', function(){
-  gulp.src('./assets/less/**/*.less')
-    .pipe(less())
-    .pipe(gulp.dest('./assets/css'));
-  var b = browserify('./angular/app.js')
-    .bundle()
-    .pipe(source('./angular/app.js'))
-    .pipe(buffer())
-    .pipe(rename('bundle.js'))
-    .pipe(gulp.dest('./angular'));
+  build();
   runApp();
 });
