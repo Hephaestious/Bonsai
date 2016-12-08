@@ -56,13 +56,13 @@
 var app = require('angular').module('bonsai');
 
 app.controller('HomeCtrl', require('./home/homeController'));
-app.controller('LoginCtrl', require('./login/loginController'));
 app.controller('RgstrCtrl', require('./register/registerController'));
+app.controller('LoginCtrl', require('./login/loginController'));
 app.factory('RgstrSrvc', require('./register/registerService'));
 
 },{"./home/homeController":2,"./login/loginController":4,"./register/registerController":5,"./register/registerService":6,"angular":13}],4:[function(require,module,exports){
 (function(){
-  var LoginCtrl = function($scope, db){
+  var LoginCtrl = function($scope, db, $location){
     $scope.account = db.primaryAccount;
     $scope.localAccounts = db.accounts;
     $scope.setAccount = function(account){
@@ -72,7 +72,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
       return username === $scope.account.username;
     }
   }
-  module.exports = ["$scope", "db", LoginCtrl];
+  module.exports = ["$scope", "db", "$location", LoginCtrl];
 }());
 
 },{}],5:[function(require,module,exports){

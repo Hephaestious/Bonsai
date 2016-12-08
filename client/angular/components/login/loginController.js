@@ -1,5 +1,5 @@
 (function(){
-  var LoginCtrl = function($scope, db){
+  var LoginCtrl = function($scope, db, $location){
     $scope.account = db.primaryAccount;
     $scope.localAccounts = db.accounts;
     $scope.setAccount = function(account){
@@ -9,5 +9,5 @@
       return username === $scope.account.username;
     }
   }
-  module.exports = ["$scope", "db", LoginCtrl];
+  module.exports = ["$scope", "db", "$location", LoginCtrl];
 }());
