@@ -10,7 +10,6 @@ var less = require('gulp-less');
 var gulpSequence = require('gulp-sequence');
 
 function build(){
-  console.log('fucku');
   gulp.src('./assets/less/**/*.less')
     .pipe(less())
     .pipe(gulp.dest('./assets/css'));
