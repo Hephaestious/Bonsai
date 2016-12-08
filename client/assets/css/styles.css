@@ -8,6 +8,7 @@
   margin: auto;
   background-color: #555;
   border-radius: 2px;
+  -webkit-box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.4);
   box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.4);
 }
 .toolbar {
