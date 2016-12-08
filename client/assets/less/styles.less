@@ -1,0 +1,85 @@
+@standardAlpha: 80%;
+@lightAlpha: 60%;
+@frontBaseColor: #ffffff;
+@backBaseColor: #333333;
+@shadowColor: rgba(0,0,0,0.4);
+
+.elevate(@height) {
+  -webkit-box-shadow: 0 unit(@height / 2, em) unit(@height, em) @shadowColor;
+  box-shadow: 0 unit(@height / 2, em) unit(@height, em) @shadowColor;
+}
+
+.title {
+  text-align: center;
+  color: fade(@frontBaseColor, @standardAlpha);
+}
+
+.floatbox {
+  width: 6em;
+  height: 6em;
+  margin: auto;
+  background-color: #555;
+  border-radius: 2px;
+  .elevate(1);
+}
+
+.toolbar {
+  background-color: @backBaseColor;
+  width: 100%;
+  position: relative;
+}
+
+.title {
+  margin: 0;
+}
+
+paper-tabs {
+  position: relative;
+}
+
+paper-tab {
+  position: relative;
+  display: inline-flex;
+  flex: 1;
+}
+
+.paperTabsContainer {
+  display: flex;
+  width: 100%;
+  position: relative;
+}
+
+.paperTabContainer {
+  width: 100%;
+  height: 3em;
+  line-height: 3em;
+  cursor: pointer;
+}
+
+.paperTabContainer > span {
+  width: 100%;
+  padding: 0 12px;
+  text-align: center;
+  position: relative;
+  display: block;
+  cursor: inherit;
+}
+
+.tabSelected {
+  width: 100%;
+  position: relative;
+  height: 2px;
+  bottom: 0;
+  background-color: fade(@frontBaseColor, @lightAlpha);
+  transition: transform;
+}
+
+.tabSelected.expand {
+  transition-duration: 0.225s;
+  transition-timing-function: cubic-bezier(0.4, 0.0, 1, 1);
+}
+
+.tabSelected.contract {
+  transition-duration: 0.27s;
+  transition-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
+}
