@@ -83,3 +83,58 @@ paper-tab {
   transition-duration: 0.27s;
   transition-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
 }
+
+// Ripple Styles
+
+paper-ripple {
+  display: block;
+  position: absolute;
+  border-radius: inherit;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+paper-ripple [animating] {
+  -webkit-transform: translate(0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+.ripple-background,
+.ripple-waves,
+.wave-container,
+.wave {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ripple-background,
+.wave {
+  opacity: 0;
+}
+
+.ripple-waves,
+.wave {
+  overflow: hidden;
+}
+
+.wave-container,
+.wave {
+  border-radius: 50%;
+}
+
+paper-ripple.circle .ripple-background,
+paper-ripple.circle .ripple-waves {
+  border-radius: 50%;
+}
+
+paper-ripple.circle .wave-container {
+  overflow: hidden;
+}

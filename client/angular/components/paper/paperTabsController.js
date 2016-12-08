@@ -16,6 +16,7 @@
     };
 
     $scope.animBar = function(newSel) {
+      if (newSel == $scope.whichOne.selected) { return; }
       var len = $scope.whichOne.list.length;
       var numScl = 1 / len;
       var oldSel = $scope.whichOne.selected;
@@ -25,7 +26,7 @@
       var doff = offset - coffset;
       bar.classList.remove('contract');
       bar.classList.add('expand');
-      bar.style.transform = "translate3d("+(coffset + doff / 2)+"%, 0, 0) scaleX("+numScl * 1.25+")";
+      bar.style.transform = "translate3d("+(coffset + doff / 2)+"%, 0, 0) scaleX("+numScl * 2+")";
       var func = ()=>{
         bar.classList.remove('expand');
         bar.classList.add('contract');
