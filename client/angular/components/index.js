@@ -1,7 +1,6 @@
 'use strict';
 var app = require('angular').module('bonsai');
 
-console.log(require('./paper/paperTabController'));
 app.component('paperTab', require('./paper/paperTabController'));
 app.component('paperTabs', require('./paper/paperTabsController'));
 
