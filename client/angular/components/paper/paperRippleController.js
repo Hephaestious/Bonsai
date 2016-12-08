@@ -224,7 +224,6 @@
 
   var PRippleCtrl = function($scope, $element){
     let thisObject = {};
-    window.xako = thisObject;
     (function($element){
       this.initialOpacity = 0.25;
       this.opacityDecayVelocity = 0.8;
