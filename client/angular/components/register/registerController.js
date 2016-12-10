@@ -12,7 +12,7 @@
       if ($scope.username === null){
         alert("fucking retard, you didn't give a username (and I put one in for you)");
       }
-      RgstrSrvc.register($scope.username);
+      RgstrSrvc.register($scope.username, $scope.password);
     };
 
   };
