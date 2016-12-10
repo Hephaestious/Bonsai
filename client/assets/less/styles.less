@@ -9,6 +9,12 @@
   box-shadow: 0 unit(@height / 2, em) unit(@height, em) @shadowColor;
 }
 
+.noselect() {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
 .title {
   text-align: center;
   color: fade(@frontBaseColor, @standardAlpha);
@@ -38,6 +44,7 @@ paper-tabs {
 }
 
 paper-tab {
+  .noselect();
   position: relative;
   display: inline-flex;
   flex: 1;

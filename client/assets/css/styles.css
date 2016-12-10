@@ -23,6 +23,9 @@ paper-tabs {
   position: relative;
 }
 paper-tab {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
   position: relative;
   display: inline-flex;
   flex: 1;
