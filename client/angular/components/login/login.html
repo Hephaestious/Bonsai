@@ -9,7 +9,8 @@
   </div>
   <div id="loginForm" ng-disabled="account == null" ng-model="account">
     <h3>{{account.username}}</h3>
-    <input type="password" ng-model="password">
+    <paper-text-field label="Username"></paper-text-field>
+    <paper-text-field password label="Password"></paper-text-field>
   </div>
   <div id="accountSelector">
     <div ng-repeat="localAccount in localAccounts" ng-if="!isActive(localAccount.username)">
