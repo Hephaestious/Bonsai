@@ -9,7 +9,7 @@
   </div>
   <div id="loginForm" ng-disabled="account == null" ng-model="account">
     <h3>{{account.username}}</h3>
-    <input type="password" ng-model="password" ng-keyup="$event.keyCode == 13 && Login(password)">
+    <paper-text-field password label="Password" ng-model="password" ng-keyup="$event.keyCode == 13 && Login(password)"></paper-text-field>
   </div>
   <div id="accountSelector">
     <div ng-repeat="localAccount in localAccounts track by $index" ng-if="!isActive(localAccount.username)">

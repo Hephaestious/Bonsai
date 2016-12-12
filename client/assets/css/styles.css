@@ -2,6 +2,9 @@
   text-align: center;
   color: rgba(255, 255, 255, 0.8);
 }
+#loginForm {
+  padding: 0 2rem;
+}
 .floatbox {
   width: 6em;
   height: 6em;
@@ -23,6 +26,9 @@ paper-tabs {
   position: relative;
 }
 paper-tab {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
   position: relative;
   display: inline-flex;
   flex: 1;
@@ -106,4 +112,60 @@ paper-ripple.circle .ripple-waves {
 }
 paper-ripple.circle .wave-container {
   overflow: hidden;
+}
+paper-text-field {
+  width: 100%;
+  position: relative;
+}
+.paperTextRoot {
+  display: block;
+  width: 100%;
+  position: relative;
+  background: none;
+  color: rgba(255, 255, 255, 0.8);
+  border: none;
+  outline: none;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+  font-size: 15;
+  flex: 1 1 auto;
+}
+.paperTextCont {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 8px 0;
+}
+.paperTextCont .labelInputCont {
+  display: block;
+  width: 100%;
+  position: relative;
+  height: 2.4rem;
+}
+.paperTextCont .labelPlaceHolder {
+  display: block;
+  width: 100%;
+  position: relative;
+  height: 2rem;
+}
+.paperTextOutline {
+  border-bottom: 2px solid #2196F3;
+  transform: scaleX(0) translate3d(0, -2px, 0);
+  transition: transform 0.2s ease;
+}
+.textLabel {
+  position: absolute;
+  bottom: 0.2em;
+  color: rgba(255, 255, 255, 0.4);
+  transform: translate3d(0, 0, 0);
+  transform-origin: 0 0;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+.labelInputCont.focused .paperTextOutline {
+  transform: scaleX(1) translate3d(0, -2px, 0);
+}
+.labelInputCont.content .textLabel {
+  transform: matrix(0.75, 0, 0, 0.75, 0, -18) translate3d(0, -1px, 0);
+}
+.labelInputCont.content.focused .textLabel {
+  color: #2196F3;
 }
