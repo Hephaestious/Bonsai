@@ -48,7 +48,7 @@
   });
 })();
 
-},{"./components":3,"./services":12,"./services/db/db":10,"./services/db/dbLoader":11,"angular":16,"angular-route":14}],2:[function(require,module,exports){
+},{"./components":3,"./services":13,"./services/db/db":11,"./services/db/dbLoader":12,"angular":17,"angular-route":15}],2:[function(require,module,exports){
 (function(){
   'use strict';
   var HomeCtrl = function($scope, $location, $rootScope, defaultAccount){
@@ -73,13 +73,14 @@ var app = require('angular').module('bonsai');
 app.component('paperTab', require('./paper/paperTabController'));
 app.component('paperTabs', require('./paper/paperTabsController'));
 app.component('paperRipple', require('./paper/paperRippleController'));
+app.component('paperTextField', require('./paper/paperTextFieldController'));
 
 app.controller('HomeCtrl', require('./home/homeController'));
 app.controller('RgstrCtrl', require('./register/registerController'));
 app.controller('LoginCtrl', require('./login/loginController'));
 app.factory('RgstrSrvc', require('./register/registerService'));
 
-},{"./home/homeController":2,"./login/loginController":4,"./paper/paperRippleController":5,"./paper/paperTabController":6,"./paper/paperTabsController":7,"./register/registerController":8,"./register/registerService":9,"angular":16}],4:[function(require,module,exports){
+},{"./home/homeController":2,"./login/loginController":4,"./paper/paperRippleController":5,"./paper/paperTabController":6,"./paper/paperTabsController":7,"./paper/paperTextFieldController":8,"./register/registerController":9,"./register/registerService":10,"angular":17}],4:[function(require,module,exports){
 (function (Buffer){
 (function(){
   var LoginCtrl = function($scope, db, $location, $rootScope){
@@ -124,7 +125,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":18}],5:[function(require,module,exports){
+},{"buffer":19}],5:[function(require,module,exports){
 (function(){
   "use strict";
   var Utility = {
@@ -577,11 +578,52 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 
 },{}],8:[function(require,module,exports){
 (function(){
+  "use strict";
+  var PTFieldCtrl = function($scope, $element){
+    var elem = $element[0].getElementsByClassName("paperTextRoot")[0];
+    ((elm = elem) => {
+      var cfunc = function(e) {
+        if (elm.value == "") {
+          elm.parentElement.classList.remove("content");
+        } else {
+          elm.parentElement.classList.add("content");
+        }
+      };
+
+      var bfunc = function(e) {
+        if (e.type == "focus") {
+          elm.parentElement.classList.add("focused");
+        } else {
+          elm.parentElement.classList.remove("focused");
+        }
+      }
+
+      elm.addEventListener("keydown", cfunc);
+      elm.addEventListener("paste", cfunc);
+      elm.addEventListener("input", cfunc);
+      elm.addEventListener("focus", bfunc);
+      elm.addEventListener("blur", bfunc);
+    })();
+  };
+
+  module.exports = {
+    templateUrl: 'angular/components/paper/paperTextField.html',
+    controller: PTFieldCtrl,
+    bindings: {
+      password: '@',
+      label: '@',
+      hint: '@',
+      width: '='
+    }
+  };
+}());
+
+},{}],9:[function(require,module,exports){
+(function(){
   'use strict';
-  var RgstrCtrl = function($scope, db, RgstrSrvc){
+  var RgstrCtrl = function($scope, db, RgstrSrvc, $location){
     $scope.isDefault = !db.anyAccounts;
     $scope.usernameValid = null;
-
     $scope.checkUser = function(username){
       RgstrSrvc.check(username, $scope);
     }
@@ -590,21 +632,24 @@ app.factory('RgstrSrvc', require('./register/registerService'));
       if ($scope.username === null){
         alert("fucking retard, you didn't give a username (and I put one in for you)");
       }
-      RgstrSrvc.register($scope.username, $scope.password);
+      RgstrSrvc.register($scope.username, $scope.password, $scope);
     };
-
+    $scope.changeView = function(){
+      $location.path('/home');
+      //$scope.$apply();
+    }
   };
 
-  module.exports = ["$scope", 'db', 'RgstrSrvc', RgstrCtrl];
+  module.exports = ["$scope", 'db', 'RgstrSrvc', '$location', RgstrCtrl];
 }());
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function (Buffer){
 (function(){
   function registerService(db, $rootScope, $location){
     var _identity, _session, _username, _password;
     var _checkKey, _checkUser, _checkCallback;
-
+    var _scope;
 
     var check = function(username, scope){
       if (db.isAccount(username)) scope.usernameValid = false;
@@ -620,11 +665,12 @@ app.factory('RgstrSrvc', require('./register/registerService'));
       socket.emit('available', req.request, checkCallback);
     }
 
-    var register = function(user, password){
+    var register = function(user, password, scope){
       _identity = nacl.sign.keyPair(); // Long term identity keypair
       _session = nacl.box.keyPair(); // Ephemeral keypair to hide metadata (used for this request only)
       _username = user;
       _password = password;
+      _scope = scope;
       username = Buffer.from(user, 'utf8');
       var signature = Buffer.from(nacl.sign.detached(username, _identity.secretKey));
       var identity_key = Buffer.from(_identity.publicKey);
@@ -657,8 +703,8 @@ app.factory('RgstrSrvc', require('./register/registerService'));
           username: _username,
           identity: _identity.secretKey
         }
-        $location.path('/home');
-        console.log($location.path());
+        _scope.changeView();
+        //_scope.$apply();
       }
     }
 
@@ -672,7 +718,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":18}],10:[function(require,module,exports){
+},{"buffer":19}],11:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 (function(){
@@ -740,7 +786,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":18}],11:[function(require,module,exports){
+},{"buffer":19}],12:[function(require,module,exports){
 var load = new Promise( // returns 1 if there are any accounts, 0 if not  accounts.count() > 0
   function(resolve, reject){
     var _db;
@@ -772,13 +818,13 @@ module.exports = load.then(function(db){
   }
 });
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 'use strict';
 console.log('importing services');
 var app = require('angular').module('bonsai');
 //app.provider('db', require('./db/dbProvider'));
 
-},{"angular":16}],13:[function(require,module,exports){
+},{"angular":17}],14:[function(require,module,exports){
 /**
  * @license AngularJS v1.5.9
  * (c) 2010-2016 Google, Inc. http://angularjs.org
@@ -1851,11 +1897,11 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
 })(window, window.angular);
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 require('./angular-route');
 module.exports = 'ngRoute';
 
-},{"./angular-route":13}],15:[function(require,module,exports){
+},{"./angular-route":14}],16:[function(require,module,exports){
 /**
  * @license AngularJS v1.5.9
  * (c) 2010-2016 Google, Inc. http://angularjs.org
@@ -34240,11 +34286,11 @@ $provide.value("$locale", {
 })(window);
 
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 require('./angular');
 module.exports = angular;
 
-},{"./angular":15}],17:[function(require,module,exports){
+},{"./angular":16}],18:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -34360,7 +34406,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -36153,14 +36199,14 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":17,"ieee754":20,"isarray":19}],19:[function(require,module,exports){
+},{"base64-js":18,"ieee754":21,"isarray":20}],20:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1

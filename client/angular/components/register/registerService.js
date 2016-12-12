@@ -2,7 +2,7 @@
   function registerService(db, $rootScope, $location){
     var _identity, _session, _username, _password;
     var _checkKey, _checkUser, _checkCallback;
-
+    var _scope;
 
     var check = function(username, scope){
       if (db.isAccount(username)) scope.usernameValid = false;
@@ -18,11 +18,12 @@
       socket.emit('available', req.request, checkCallback);
     }
 
-    var register = function(user, password){
+    var register = function(user, password, scope){
       _identity = nacl.sign.keyPair(); // Long term identity keypair
       _session = nacl.box.keyPair(); // Ephemeral keypair to hide metadata (used for this request only)
       _username = user;
       _password = password;
+      _scope = scope;
       username = Buffer.from(user, 'utf8');
       var signature = Buffer.from(nacl.sign.detached(username, _identity.secretKey));
       var identity_key = Buffer.from(_identity.publicKey);
@@ -55,8 +56,8 @@
           username: _username,
           identity: _identity.secretKey
         }
-        $location.path('/home');
-        console.log($location.path());
+        _scope.changeView();
+        //_scope.$apply();
       }
     }
 
