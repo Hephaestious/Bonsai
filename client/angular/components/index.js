@@ -4,6 +4,7 @@ var app = require('angular').module('bonsai');
 app.component('paperTab', require('./paper/paperTabController'));
 app.component('paperTabs', require('./paper/paperTabsController'));
 app.component('paperRipple', require('./paper/paperRippleController'));
+app.component('paperTextField', require('./paper/paperTextFieldController'));
 
 app.controller('HomeCtrl', require('./home/homeController'));
 app.controller('RgstrCtrl', require('./register/registerController'));
