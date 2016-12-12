@@ -32,13 +32,21 @@
       console.log("Adding account to database: ", username);
       var newAccount = {
         username: username,
-        identity: identity
+        encryptedIdentity: identity,
+        primaryAccount: false,
+        autoLogin: false
       };
+      // If there is no primary account set, this account will become the primary one
+      if (accounts.findOne({primaryAccount: true}) === null){
+        newAccount.primaryAccount = true;
+      }
       accounts.insert(newAccount);
       _db.saveDatabase();
-      console.log(accounts.count());
-      console.log(_db.getCollection('accounts').count());
     }
+
+    function getPrimary(){
+      return accounts.findOne({primaryAccount: true}) || accounts.findOne({}); // TODO - Remove the null coalescing, this is only for development laziness.
+    }                                                                          //                                         Has no functionality in product
 
     return {
       addAccount: addAccount,
@@ -46,7 +54,7 @@
       newRequest: newRequest,
       get anyAccounts(){return anyAccounts()},
       get primaryAccount(){
-        return accounts.findOne({username: 'dinglee'}) || accounts.findOne({});
+        return getPrimary();
       },
       accounts: accounts.find({})
     }

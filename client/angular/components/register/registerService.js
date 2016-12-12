@@ -1,10 +1,11 @@
 (function(){
-  function registerService(db){
-    var _identity, _session, _username;
+  function registerService(db, $rootScope, $location){
+    var _identity, _session, _username, _password;
     var _checkKey, _checkUser, _checkCallback;
+
+
     var check = function(username, scope){
-      console.log('checking');
-      if (db.isAccount(username)) $scope.usernameValid = false;
+      if (db.isAccount(username)) scope.usernameValid = false;
       _checkUser = username;
       var req = db.newRequest(username, 'utf8');
       _checkKey = req.key;
@@ -15,13 +16,13 @@
         scope.$apply();
       }
       socket.emit('available', req.request, checkCallback);
-      console.log("Sent username availability check for:"+username);
     }
 
-    var register = function(user){
+    var register = function(user, password){
       _identity = nacl.sign.keyPair(); // Long term identity keypair
       _session = nacl.box.keyPair(); // Ephemeral keypair to hide metadata (used for this request only)
       _username = user;
+      _password = password;
       username = Buffer.from(user, 'utf8');
       var signature = Buffer.from(nacl.sign.detached(username, _identity.secretKey));
       var identity_key = Buffer.from(_identity.publicKey);
@@ -37,17 +38,33 @@
       socket.emit('register', request, registerCallback);
       console.log("Sent registratison request");
     }
+
     var registerCallback = function(response){
       if (response.status === 'success'){
-        console.log('registered');
-        db.addAccount(_username, _identity);
+        console.log('Confirmed registration');
+        cipher = crypto.createCipher('aes192', _password);
+        var encrypted = new Buffer(cipher.update(_identity.secretKey));
+        console.log(encrypted);
+        encrypted = Buffer.concat([encrypted, new Buffer(cipher.final())]);
+        console.log("Secret key");
+        console.log(_identity.secretKey);
+        console.log("Encrypted secret key");
+        console.log(encrypted);
+        db.addAccount(_username, encrypted);
+        $rootScope.activeUser = {
+          username: _username,
+          identity: _identity.secretKey
+        }
+        $location.path('/home');
+        console.log($location.path());
       }
     }
+
     return {
       register: register,
       check: check
     }
   }
 
-  module.exports = ['db', registerService];
+  module.exports = ['db', '$rootScope', '$location', registerService];
 }());

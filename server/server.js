@@ -38,16 +38,12 @@ io.on('connection', function(socket){
   socket.emit('got','');
   console.log('Socket connection established');
   socket.on('available', function(requestCipher, cb){
-    console.log('got availability request');
     var request = decryptCall(requestCipher);
     var username = Buffer.from(request).toString('utf8');
-    console.log(username);
     if (users.find({username: username}).length !== 0){
-      console.log('false');
       return cb(false);
     }
     cb(true);
-    console.log(true);
   });
   socket.on('register', function(requestCipher, cb){
     console.log("Got register request.");
