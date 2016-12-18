@@ -9,8 +9,11 @@
   </div>
   <div id="loginForm" ng-disabled="account == null" ng-model="account">
     <h3>{{account.username}}</h3>
-    <paper-text-field label="Username"></paper-text-field>
-    <paper-text-field password label="Password"></paper-text-field>
+    <paper-text-field ptf-expose label="Username" ng-model="username"></paper-text-field>
+    <paper-text-field ptf-expose password label="Password" ng-model="password"></paper-text-field>
+    <div class="flexRow reversed">
+      <paper-button>Create Account</paper-button>
+    </div>
   </div>
   <div id="accountSelector">
     <div ng-repeat="localAccount in localAccounts" ng-if="!isActive(localAccount.username)">

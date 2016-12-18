@@ -169,3 +169,30 @@ paper-text-field {
 .labelInputCont.content.focused .textLabel {
   color: #2196F3;
 }
+paper-button {
+  display: inline-flex;
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC);
+}
+.paperButtonRoot {
+  padding: 0 8px;
+  line-height: 3em;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: normal;
+  outline: none;
+}
+.paperButtonRoot:focus {
+  font-weight: bold;
+}
+.flexRow {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  position: relative;
+}
+.flexRow.reversed {
+  flex-direction: row-reverse;
+}
