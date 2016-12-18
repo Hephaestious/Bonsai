@@ -1,4 +1,16 @@
-<div class="jumbotron">
-  {{$root.activeUser.username}}
-
+<div style='height: 100%; width: 100%;margin:0;padding:0;border:0;vertical-align:top'>
+  <div style='height: 100%; width: 19%; margin: 0; padding: 0;background:green;display:inline-block;border:0;vertical-align:top'>
+    <div ng-repeat='friend in friends track by $index'>
+      <h3>{{friend.username}}</h3>
+    </div>
+    <div>
+      <h4>Find friend</h4><input type='text' ng-model='searchterm' ng-change='Search(searchterm)'>
+      <div ng-repeat='result in searchUsersResults track by $index'>
+        <h5>{{result.username}}</h5>
+        <button ng-click='Chat(result.username)'>Chat Now</button>
+      </div>
+    </div>
+  </div>
+  <div style='height: 100%; width: 80%; margin: 0;padding:0;background:red;display:inline-block;border:0;vertical-align:top'>
+  </div>
 </div>

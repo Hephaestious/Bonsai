@@ -37,13 +37,32 @@ if (!String.prototype.format) {
 io.on('connection', function(socket){
   socket.emit('got','');
   console.log('Socket connection established');
-  socket.on('available', function(requestCipher, cb){
+  socket.on('available', function(requestCipher){
     var request = decryptCall(requestCipher);
     var username = Buffer.from(request).toString('utf8');
     if (users.find({username: username}).length !== 0){
-      return cb(false);
+      socket.emit('check-result', null);
     }
-    cb(true);
+    socket.emit('check-result', username);
+  });
+  socket.on('searchUser', function(term){
+    socket.emit('searchUser-result', users.chain().find({'username': {'$contains': term}}).limit(10).data());
+  });
+  socket.on('chat', function(username){
+    var user = users.findOne({'username': username});
+    if (user === null){
+      return socket.emit('chat-response', null);
+    }
+    if (user.preKeys === null){
+      return socket.emit('chat-response', null);
+    }
+    console.log('sending prekey');
+    var key = user.pre_keys.pop();
+    var pre_key = {
+      publicKey: buf(key.publicKey),
+      signature: buf(key.signature)
+    }
+    return socket.emit('chat-response', {username: username, pre_key: pre_key, identity: buf(user.identity_key)});
   });
   socket.on('register', function(requestCipher, cb){
     console.log("Got register request.");
@@ -54,16 +73,18 @@ io.on('connection', function(socket){
     sure how to reply to the client so I'm using this for development
     */
     // TODO - Better validation
-    var request = decryptCall(requestCipher);
+    var request = decryptCall2(requestCipher);
     if (!request){ // Indicates that decryption was not successful
       // TODO: Handle this better
       return cb({status: 'could not decrypt'});
     }
     // I just concatenated the byte arrays of these to save the code from some weird encoding logic since all the
     // items have to be made into a single byte array for encryption anyways
-    var identity_key = request.slice(0,32);
-    var signature = request.slice(32,96);
-    var username = request.slice(96, request.length);
+    var identity_key = naclDecode(request.identity_key);
+    var signature = naclDecode(request.signature);
+    var username = naclDecode(request.username);
+    var ispublic = request.signedPreKeys !== null;
+    var signedPreKeys = request.signedPreKeys;
     var sigValid = nacl.sign.detached.verify(username, signature, identity_key);
     if (!sigValid){ // Indicates signature is not valid
       // TODO: More detailed response
@@ -75,8 +96,10 @@ io.on('connection', function(socket){
     }
     var newUser = {
       username: username,
-      identity_key: identity_key,
-      signature: signature
+      identity_key: request.identity_key,
+      signature: request.signature,
+      pre_keys: signedPreKeys,
+      public: ispublic
     }
     users.insert(newUser);
     return cb({status: 'success'});
@@ -93,4 +116,23 @@ function decryptCall(req){
   return data;
 }
 
+function decryptCall2(req){
+  // Decrypts API Calls with server's identity key
+  var cipher = Uint8Array.from(req.cipher);
+  var c_sessionKey = Uint8Array.from(req.session_key);
+  var nonce = Uint8Array.from(req.nonce);
+  var data = Buffer.from(nacl.box.open(cipher, nonce, c_sessionKey, secret));
+  data = JSON.parse(data);
+  return data;
+}
+
+function naclEncode(obj){
+  return Buffer.from(JSON.stringify(obj));
+}
+function naclDecode(s){
+  return Uint8Array.from(Buffer.from(s));
+}
+function buf(o){
+  return Buffer.from(o);
+}
 console.log('Listening to port 3000');

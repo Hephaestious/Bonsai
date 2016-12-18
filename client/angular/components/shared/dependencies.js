@@ -22,3 +22,12 @@ if (!String.prototype.format) {
 var path = require('path');
 var loki = require('lokijs');
 const crypto = require('crypto');
+function naclEncode(obj){
+  return Buffer.from(JSON.stringify(obj));
+}
+function naclDecode(s){
+  return Uint8Array.from(Buffer.from(s));
+}
+function buf(o){
+  return Buffer.from(o);
+}

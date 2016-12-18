@@ -7,6 +7,7 @@ app.component('paperRipple', require('./paper/paperRippleController'));
 app.component('paperTextField', require('./paper/paperTextFieldController'));
 
 app.controller('HomeCtrl', require('./home/homeController'));
+app.factory('HomeSrvc', require('./home/homeService'));
 app.controller('RgstrCtrl', require('./register/registerController'));
 app.controller('LoginCtrl', require('./login/loginController'));
 app.factory('RgstrSrvc', require('./register/registerService'));

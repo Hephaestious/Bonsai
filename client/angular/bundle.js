@@ -48,10 +48,11 @@
   });
 })();
 
-},{"./components":3,"./services":13,"./services/db/db":11,"./services/db/dbLoader":12,"angular":17,"angular-route":15}],2:[function(require,module,exports){
+},{"./components":4,"./services":14,"./services/db/db":12,"./services/db/dbLoader":13,"angular":18,"angular-route":16}],2:[function(require,module,exports){
 (function(){
   'use strict';
-  var HomeCtrl = function($scope, $location, $rootScope, defaultAccount){
+  var HomeCtrl = function($scope, $location, $rootScope, HomeSrvc, defaultAccount){
+    HomeSrvc.setScope($scope);
     if (defaultAccount !== null){
       $rootScope.activeUser = {
         username: defaultAccount.username,
@@ -61,12 +62,59 @@
     $scope.changeView = function(){
       $location.path('/register'); // path not hash
     };
+    $scope.Search = function(searchterm){
+      HomeSrvc.searchUser(searchterm, $scope);
+    }
+    $scope.Chat = function(username){
+      HomeSrvc.chat(username);
+    }
   };
 
-  module.exports = ["$scope", "$location", "$rootScope", "defaultAccount", HomeCtrl];
+  module.exports = ["$scope", "$location", "$rootScope", "HomeSrvc", "defaultAccount", HomeCtrl];
 }());
 
 },{}],3:[function(require,module,exports){
+(function(){
+  var homeService = function(db){
+    var _scope;
+    function setScope(scope){
+      _scope = scope;
+    }
+    function searchUser(term){
+      socket.emit('searchUser', term);
+    }
+    socket.on('searchUser-result', function(users){
+      _scope.searchUsersResults = users;
+      _scope.$apply();
+    })
+    function chat(username){
+      socket.emit('chat', username);
+    }
+    socket.on('chat-response', function(response){
+      if (response === null){
+        console.log('failed to make chat');
+      }
+      var newKey = nacl.box.keyPair();
+      var theirID = naclDecode(response.identity);
+      var sig = naclDecode(response.pre_key.signature);
+      var theirKey = naclDecode(response.pre_key.publicKey);
+      if (nacl.sign.detached.verify(theirKey, sig, theirID)){
+        console.log('verified!!!');
+      }
+      else{
+        console.log('fucljadasd')
+      }
+    })
+    return{
+      setScope: setScope,
+      searchUser: searchUser,
+      chat: chat
+    }
+  }
+  module.exports = ['db', homeService]
+}());
+
+},{}],4:[function(require,module,exports){
 'use strict';
 var app = require('angular').module('bonsai');
 
@@ -76,15 +124,23 @@ app.component('paperRipple', require('./paper/paperRippleController'));
 app.component('paperTextField', require('./paper/paperTextFieldController'));
 
 app.controller('HomeCtrl', require('./home/homeController'));
+app.factory('HomeSrvc', require('./home/homeService'));
 app.controller('RgstrCtrl', require('./register/registerController'));
 app.controller('LoginCtrl', require('./login/loginController'));
 app.factory('RgstrSrvc', require('./register/registerService'));
 
-},{"./home/homeController":2,"./login/loginController":4,"./paper/paperRippleController":5,"./paper/paperTabController":6,"./paper/paperTabsController":7,"./paper/paperTextFieldController":8,"./register/registerController":9,"./register/registerService":10,"angular":17}],4:[function(require,module,exports){
+},{"./home/homeController":2,"./home/homeService":3,"./login/loginController":5,"./paper/paperRippleController":6,"./paper/paperTabController":7,"./paper/paperTabsController":8,"./paper/paperTextFieldController":9,"./register/registerController":10,"./register/registerService":11,"angular":18}],5:[function(require,module,exports){
 (function (Buffer){
 (function(){
   var LoginCtrl = function($scope, db, $location, $rootScope){
-
+    var defaul = db.getDefault();
+    if (defaul !== null){
+      $rootScope.activeUser = {
+        username: defaul.username,
+        identity: defaul.encryptedIdentity // won't actually be encrypted
+      }
+      $location.path('/home');
+    }
     $scope.account = db.primaryAccount;
     $scope.localAccounts = db.accounts;
 
@@ -94,11 +150,10 @@ app.factory('RgstrSrvc', require('./register/registerService'));
     $scope.isActive = function(username){
       return username === $scope.account.username;
     }
-    $scope.Login = function(password){
-      var _password = password; // copy the password just in case
-      decipher = crypto.createDecipher('aes192', _password);
-      console.log("Encrypted identity");
-      console.log($scope.account.encryptedIdentity.data);
+    $scope.Login = function(){
+      console.log($scope.password)
+      var _password = new Buffer($scope.password); // copy the password
+      decipher = crypto.createDecipher('aes192', _password); // Create decipher
       var decrypted = new Buffer(decipher.update(new Buffer($scope.account.encryptedIdentity.data)));
       decrypted = Buffer.concat([decrypted, new Buffer(decipher.final())]);
       console.log("Decrypted secret key");
@@ -109,6 +164,9 @@ app.factory('RgstrSrvc', require('./register/registerService'));
           $rootScope.activeUser = {
             username: $scope.account.username,
             identity: identity
+          }
+          if ($scope.remember){
+            db.setDefault($scope.account, identity);
           }
           $location.path('/home');
         }
@@ -125,7 +183,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":19}],5:[function(require,module,exports){
+},{"buffer":20}],6:[function(require,module,exports){
 (function(){
   "use strict";
   var Utility = {
@@ -494,7 +552,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
   };
 }());
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function(){
   "use strict";
   var PTabCtrl = function($scope, $element){
@@ -527,7 +585,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
   };
 }());
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function(){
   "use strict";
   var PTabsCtrl = function($scope, $element){
@@ -576,7 +634,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
   };
 }());
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function(){
   "use strict";
   var PTFieldCtrl = function($scope, $element){
@@ -618,71 +676,93 @@ app.factory('RgstrSrvc', require('./register/registerService'));
   };
 }());
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 (function(){
   'use strict';
   var RgstrCtrl = function($scope, db, RgstrSrvc, $location){
     $scope.isDefault = !db.anyAccounts;
     $scope.usernameValid = null;
     $scope.checkUser = function(username){
+      console.log($scope.username)
       RgstrSrvc.check(username, $scope);
     }
 
     $scope.Create = function(){
-      if ($scope.username === null){
-        alert("fucking retard, you didn't give a username (and I put one in for you)");
+      if ($scope.username === null || $scope.username !== $scope.usernameValid){
+        console.log('nope')
+        return;
       }
-      RgstrSrvc.register($scope.username, $scope.password, $scope);
+      RgstrSrvc.register($scope.username, $scope.password, $scope.privacy);
     };
     $scope.changeView = function(){
       $location.path('/home');
-      //$scope.$apply();
+      $scope.$apply();
     }
   };
 
   module.exports = ["$scope", 'db', 'RgstrSrvc', '$location', RgstrCtrl];
 }());
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (Buffer){
 (function(){
   function registerService(db, $rootScope, $location){
     var _identity, _session, _username, _password;
     var _checkKey, _checkUser, _checkCallback;
     var _scope;
+    var _preKeys = null;
 
     var check = function(username, scope){
+      _scope = scope;
       if (db.isAccount(username)) scope.usernameValid = false;
       _checkUser = username;
       var req = db.newRequest(username, 'utf8');
       _checkKey = req.key;
-      // TODO - Find a better way to link responses and requests
-      var checkCallback = function(data){
-        console.log((data ? "" : "not "), "available");
-        scope.usernameValid = data;
-        scope.$apply();
-      }
-      socket.emit('available', req.request, checkCallback);
+      socket.emit('available', req.request);
     }
-
-    var register = function(user, password, scope){
+    socket.on('check-result', function(result){
+      _scope.usernameValid = result;
+      _scope.$apply();
+    })
+    var register = function(user, password, privacy){
       _identity = nacl.sign.keyPair(); // Long term identity keypair
       _session = nacl.box.keyPair(); // Ephemeral keypair to hide metadata (used for this request only)
       _username = user;
       _password = password;
-      _scope = scope;
       username = Buffer.from(user, 'utf8');
-      var signature = Buffer.from(nacl.sign.detached(username, _identity.secretKey));
-      var identity_key = Buffer.from(_identity.publicKey);
-      var data = Buffer.concat([identity_key, signature, username]);
+      var prekeys = [];
+      var signedPreKeys = [];
+      if (!privacy){ // If the account is public, meaning people can send messages to the user without first sending a friend request,
+        var i;       // we will create several pre-keys that can be used to begin chat sessions and sign them to verify authenticity
+        for(i=0;i<10;i++){
+          var newKey = nacl.box.keyPair();
+          var keySig = nacl.sign.detached(newKey.publicKey, _identity.secretKey);
+          prekeys.push(newKey);
+          signedPreKeys.push({
+            publicKey: buf(newKey.publicKey),
+            signature: buf(keySig)
+          });
+        }
+      }
+      _preKeys = prekeys;
+      var signature = nacl.sign.detached(username, _identity.secretKey);
+      var data = {
+        identity_key: buf(_identity.publicKey),
+        signature: buf(signature),
+        username: username,
+        signedPreKeys: signedPreKeys
+      }
+      data = Buffer.from(JSON.stringify(data));
+      //var data = Buffer.concat([identity_key, signature, username]);
       var nonce = nacl.randomBytes(nacl.box.nonceLength); // Generate random nonce
       var encryptedData = nacl.box(data, nonce, pub_ServerID, _session.secretKey); // Encrypt public key for identity with ephemeral key.
       var request = {
         // Probably should obfuscate this in production
-        cipher: Buffer.from(encryptedData),
-        session_key: Buffer.from(_session.publicKey),
-        nonce: Buffer.from(nonce)
+        cipher: buf(encryptedData),
+        session_key: buf(_session.publicKey),
+        nonce: buf(nonce)
       };
+      console.log(buf(encryptedData))
       socket.emit('register', request, registerCallback);
       console.log("Sent registratison request");
     }
@@ -698,7 +778,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
         console.log(_identity.secretKey);
         console.log("Encrypted secret key");
         console.log(encrypted);
-        db.addAccount(_username, encrypted);
+        db.addAccount(_username, encrypted, _preKeys);
         $rootScope.activeUser = {
           username: _username,
           identity: _identity.secretKey
@@ -718,7 +798,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":19}],11:[function(require,module,exports){
+},{"buffer":20}],12:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 (function(){
@@ -745,18 +825,42 @@ app.factory('RgstrSrvc', require('./register/registerService'));
       return accounts.count() > 0;
     }
 
+    var getDefault = function(){
+      var query = {'$and': [
+        {
+          'primaryAccount': true
+        },
+        {
+          'autoLogin': true
+        }]};
+      return accounts.findOne(query);
+    }
+
+    var setDefault = function(_account, _identity){
+      accounts.find({}).forEach(function(account){ // Disable autologin for all other users
+        account.primaryAccount = false;
+        account.autoLogin = false;
+      })
+      _account.primaryAccount = true;
+      _account.autoLogin = true;
+      _account.encryptedIdentity = _identity; // Save identity decrypted so user can autologin
+      _db.saveDatabase();
+    }
+
     function isAccount(username){
       // This only checks if there is a local account
       return accounts.find({username: username}).length !== 0;
     }
 
-    function addAccount(username, identity){
+    function addAccount(username, identity, prekeys){
       console.log("Adding account to database: ", username);
       var newAccount = {
         username: username,
         encryptedIdentity: identity,
+        preKeys: prekeys,
         primaryAccount: false,
-        autoLogin: false
+        autoLogin: false,
+        friends: []
       };
       // If there is no primary account set, this account will become the primary one
       if (accounts.findOne({primaryAccount: true}) === null){
@@ -778,7 +882,9 @@ app.factory('RgstrSrvc', require('./register/registerService'));
       get primaryAccount(){
         return getPrimary();
       },
-      accounts: accounts.find({})
+      accounts: accounts.find({}),
+      getDefault: getDefault,
+      setDefault: setDefault
     }
   }
 
@@ -786,7 +892,7 @@ app.factory('RgstrSrvc', require('./register/registerService'));
 }());
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":19}],12:[function(require,module,exports){
+},{"buffer":20}],13:[function(require,module,exports){
 var load = new Promise( // returns 1 if there are any accounts, 0 if not  accounts.count() > 0
   function(resolve, reject){
     var _db;
@@ -818,13 +924,13 @@ module.exports = load.then(function(db){
   }
 });
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 console.log('importing services');
 var app = require('angular').module('bonsai');
 //app.provider('db', require('./db/dbProvider'));
 
-},{"angular":17}],14:[function(require,module,exports){
+},{"angular":18}],15:[function(require,module,exports){
 /**
  * @license AngularJS v1.5.9
  * (c) 2010-2016 Google, Inc. http://angularjs.org
@@ -1897,11 +2003,11 @@ function ngViewFillContentFactory($compile, $controller, $route) {
 
 })(window, window.angular);
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 require('./angular-route');
 module.exports = 'ngRoute';
 
-},{"./angular-route":14}],16:[function(require,module,exports){
+},{"./angular-route":15}],17:[function(require,module,exports){
 /**
  * @license AngularJS v1.5.9
  * (c) 2010-2016 Google, Inc. http://angularjs.org
@@ -34286,11 +34392,11 @@ $provide.value("$locale", {
 })(window);
 
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 require('./angular');
 module.exports = angular;
 
-},{"./angular":16}],18:[function(require,module,exports){
+},{"./angular":17}],19:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -34406,7 +34512,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -36199,14 +36305,14 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":18,"ieee754":21,"isarray":20}],20:[function(require,module,exports){
+},{"base64-js":19,"ieee754":22,"isarray":21}],21:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1

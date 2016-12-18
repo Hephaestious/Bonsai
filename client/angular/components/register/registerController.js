@@ -4,14 +4,16 @@
     $scope.isDefault = !db.anyAccounts;
     $scope.usernameValid = null;
     $scope.checkUser = function(username){
+      console.log($scope.username)
       RgstrSrvc.check(username, $scope);
     }
 
     $scope.Create = function(){
-      if ($scope.username === null){
-        alert("fucking retard, you didn't give a username (and I put one in for you)");
+      if ($scope.username === null || $scope.username !== $scope.usernameValid){
+        console.log('nope')
+        return;
       }
-      RgstrSrvc.register($scope.username, $scope.password, $scope);
+      RgstrSrvc.register($scope.username, $scope.password, $scope.privacy);
     };
     $scope.changeView = function(){
       $location.path('/home');

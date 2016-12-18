@@ -1,6 +1,13 @@
 (function(){
   var LoginCtrl = function($scope, db, $location, $rootScope){
-
+    var defaul = db.getDefault();
+    if (defaul !== null){
+      $rootScope.activeUser = {
+        username: defaul.username,
+        identity: defaul.encryptedIdentity // won't actually be encrypted
+      }
+      $location.path('/home');
+    }
     $scope.account = db.primaryAccount;
     $scope.localAccounts = db.accounts;
 
@@ -10,11 +17,10 @@
     $scope.isActive = function(username){
       return username === $scope.account.username;
     }
-    $scope.Login = function(password){
-      var _password = password; // copy the password just in case
-      decipher = crypto.createDecipher('aes192', _password);
-      console.log("Encrypted identity");
-      console.log($scope.account.encryptedIdentity.data);
+    $scope.Login = function(){
+      console.log($scope.password)
+      var _password = new Buffer($scope.password); // copy the password
+      decipher = crypto.createDecipher('aes192', _password); // Create decipher
       var decrypted = new Buffer(decipher.update(new Buffer($scope.account.encryptedIdentity.data)));
       decrypted = Buffer.concat([decrypted, new Buffer(decipher.final())]);
       console.log("Decrypted secret key");
@@ -25,6 +31,9 @@
           $rootScope.activeUser = {
             username: $scope.account.username,
             identity: identity
+          }
+          if ($scope.remember){
+            db.setDefault($scope.account, identity);
           }
           $location.path('/home');
         }

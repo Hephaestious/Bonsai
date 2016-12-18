@@ -1,12 +1,14 @@
-<div class='jumbotron'>
+<div class="floatbox" style="height: auto; width: auto">
   <a ng-show="!isDefault" href="#/login">Back</a>
   <h3>Create Account</h3>
 
   <div>
-    Username <input ng-model='username' ng-change='checkUser(username)' type='text' id="username" class='{{ usernameValid === null ? '' : usernameValid ? "validUsername" : "invalidUsername"}}'>
+    <input label="Username" ng-model='username' ng-change='checkUser(username)' type='text'>
     <img ng-show='usernameValid !== null' ng-src='{{usernameValid ? ("assets/img/available.png" || null) : ("assets/img/notAvailable.png" || null)}}' />
-  </br>
-    Password <input ng-model='password' type='password' ng-disabled='!usernameValid'>
+    <input label="Password" ng-model='password' type='password' ng-disabled='!usernameValid'>
+    <h4>Privacy</h4>
+    <input title="Don't allow people to message me without my permission" type='radio' ng-value='true' ng-model='privacy'>Private
+    <input title="Anyone can message me" type='radio' ng-value='false' ng-model='privacy'>Public
     <button ng-click='Create()'>Create</button>
   </div>
   <a ng-show="isDefault" href="#/add">Add Account</a>

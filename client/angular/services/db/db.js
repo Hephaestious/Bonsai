@@ -23,18 +23,42 @@
       return accounts.count() > 0;
     }
 
+    var getDefault = function(){
+      var query = {'$and': [
+        {
+          'primaryAccount': true
+        },
+        {
+          'autoLogin': true
+        }]};
+      return accounts.findOne(query);
+    }
+
+    var setDefault = function(_account, _identity){
+      accounts.find({}).forEach(function(account){ // Disable autologin for all other users
+        account.primaryAccount = false;
+        account.autoLogin = false;
+      })
+      _account.primaryAccount = true;
+      _account.autoLogin = true;
+      _account.encryptedIdentity = _identity; // Save identity decrypted so user can autologin
+      _db.saveDatabase();
+    }
+
     function isAccount(username){
       // This only checks if there is a local account
       return accounts.find({username: username}).length !== 0;
     }
 
-    function addAccount(username, identity){
+    function addAccount(username, identity, prekeys){
       console.log("Adding account to database: ", username);
       var newAccount = {
         username: username,
         encryptedIdentity: identity,
+        preKeys: prekeys,
         primaryAccount: false,
-        autoLogin: false
+        autoLogin: false,
+        friends: []
       };
       // If there is no primary account set, this account will become the primary one
       if (accounts.findOne({primaryAccount: true}) === null){
@@ -56,7 +80,9 @@
       get primaryAccount(){
         return getPrimary();
       },
-      accounts: accounts.find({})
+      accounts: accounts.find({}),
+      getDefault: getDefault,
+      setDefault: setDefault
     }
   }
 

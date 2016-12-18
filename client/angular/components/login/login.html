@@ -1,4 +1,4 @@
-<div class="loginPage">
+<div class="floatbox" style="height: auto; width: auto">
   <!-- Just here for testing paper components, will NOT stay here -->
   <div class="toolbar">
     <paper-tabs>
@@ -9,7 +9,10 @@
   </div>
   <div id="loginForm" ng-disabled="account == null" ng-model="account">
     <h3>{{account.username}}</h3>
-    <paper-text-field password label="Password" ng-model="password" ng-keyup="$event.keyCode == 13 && Login(password)"></paper-text-field>
+    <input type=password label="Password" ng-model="password" ng-keyup="$event.keyCode == 13 && Login()">
+    Remember?
+    <input type='radio' name='remember' value='rememberY' ng-model='remember'>Yes
+    <input type='radio' name='remember' value='rememberN'>No
   </div>
   <div id="accountSelector">
     <div ng-repeat="localAccount in localAccounts track by $index" ng-if="!isActive(localAccount.username)">
