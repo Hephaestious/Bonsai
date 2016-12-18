@@ -333,7 +333,7 @@
           ripple = this.ripples[index];
           ripple.draw();
           $element[0].children[0].style.opacity = ripple.outerOpacity;
-          if (ripple.isOpacityFullyDecayed && !ripple.isRestingAtMaxRadius) {
+          if (ripple.isOpacityFullyDecayed) {
             this.removeRipple(ripple);
           }
         }
